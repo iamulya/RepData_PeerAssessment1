@@ -7,19 +7,68 @@ output:
 
 
 ## Loading and preprocessing the data
+```{r}
+require(readr)
+require(tidyverse)
+activity <- read_csv("activity.csv")
+activity_no_na <- activity %>% filter(!is.na(steps))
+```
 
 
 
 ## What is mean total number of steps taken per day?
+```{r}
+activity_grp <- activity_no_na %>% group_by(date) %>% summarise(total.steps = sum(steps))
+hist(activity_grp$total.steps, xlab = "Total steps", main="Total Steps in October and November", col="yellow")
+median_steps <- median(activity_grp$total.steps)
+mean_steps <- round(mean(activity_grp$total.steps), 2)
+```
 
 
 
 ## What is the average daily activity pattern?
+```{r}
+activity_interval_mean <- activity_no_na %>% group_by(interval) %>% summarise(avg.steps.int = mean(steps))
+with(activity_interval_mean, plot(interval, avg.steps.int, type="l", ylab = "Average steps", main = "Average number of steps taken, averaged across all days"))
+max_steps <- activity_interval_mean %>% filter(avg.steps.int == max(avg.steps.int)) %>% select(interval)
+```
 
 
 
 ## Imputing missing values
+```{r}
+require(chron)
+total_nas <- sum(is.na(activity$steps))
+activity$isWeekend <- is.weekend(activity$date) 
+activityWknd <- activity %>% group_by(interval, isWeekend) %>% summarise(avg.steps = ceiling(mean(steps, na.rm=T)))
+mrg <- merge(activity, activityWknd, by=c("interval", "isWeekend"))
+mrg <- mrg %>% mutate(steps = ifelse(is.na(steps), avg.steps, steps))
+activity_mrg<- mrg %>% group_by(date) %>% summarise(total.steps = sum(steps))
+hist(activity_mrg$total.steps, xlab = "Total steps", main="Total Steps in October and November", col="yellow")
+median_steps <- median(activity_mrg$total.steps)
+mean_steps <- round(mean(activity_mrg$total.steps), 2)
+```
+Now comparing total steps with and without imputed data
+```{r warning=FALSE, fig.align="center"}
+totalStepsComp <- left_join(activity_mrg, activity_grp, by="date") 
+tidyComp <- gather(totalStepsComp, "Steps.typ", "Total.Steps", -date)
+a <- ggplot(data=tidyComp, aes(x=date, y=Total.Steps, group=Steps.typ, shape=Steps.typ, color=Steps.typ)) + 
+        geom_line() + 
+        geom_point()
+a + scale_color_discrete(name="Data", labels=c("Imputed data", "Data with missing values")) + 
+    scale_shape_discrete(name="Data", labels=c("Imputed data", "Data with missing values")) + 
+    labs(y="Total Steps", 
+         title="Impact of imputing missing data",
+         caption="Imputing data doesn't impact the means because data was mostly missing for the whole day")   + 
+    theme(plot.title = element_text(hjust = 0.5), plot.caption = element_text(hjust=0.5))
+```
+
 
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r}
+wkendComp <- mrg %>% mutate(isWeekend = ifelse(isWeekend, "weekend", "weekday"))
+ggplot(wkendComp, aes(interval, steps)) + geom_line() + facet_grid(isWeekend ~ .) + labs(y="Number of steps", x="Interval")
+```
+
