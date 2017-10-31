@@ -18,6 +18,8 @@ First of all we load the activit.csv using *read_csv* from the **readr** package
 ```{r}
 require(readr)
 require(tidyverse)
+download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip", destfile="data.zip", method="curl")
+unzip ("data.zip")
 activity <- read_csv("activity.csv")
 activity_no_na <- activity %>% 
                   filter(!is.na(steps))

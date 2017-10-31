@@ -1,11 +1,9 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
+```
+## Warning: package 'knitr' was built under R version 3.3.2
+```
 
 
 This report analyses the data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
@@ -16,6 +14,8 @@ First of all we load the activit.csv using *read_csv* from the **readr** package
 ```r
 require(readr)
 require(tidyverse)
+download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip", destfile="data.zip", method="curl")
+unzip ("data.zip")
 activity <- read_csv("activity.csv")
 activity_no_na <- activity %>% 
                   filter(!is.na(steps))
@@ -33,7 +33,7 @@ activity_grp <- activity_no_na %>%
 hist(activity_grp$total.steps, xlab = "Total steps", main="Total Steps in October and November", col="yellow")
 ```
 
-<img src="figure/unnamed-chunk-2-1.png" title="plot of chunk unnamed-chunk-2" alt="plot of chunk unnamed-chunk-2" style="display: block; margin: auto;" />
+<img src="PA1_template_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
 
 Next we calculate and print out the mean and median of the total number of steps taken per day.
 
@@ -67,7 +67,7 @@ activity_interval_mean <- activity_no_na %>%
 with(activity_interval_mean, plot(interval, avg.steps.int, type="l", ylab = "Average steps", main = "Average number of steps taken, averaged across all days"))
 ```
 
-![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png)
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 Next, we figure out the 5-minute interval, which contains the maximum number of steps, on average across all the days in the dataset.
 
@@ -114,7 +114,7 @@ activity_mrg<- mrg %>%
 hist(activity_mrg$total.steps, xlab = "Total steps", main="Total Steps in October and November", col="yellow")
 ```
 
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png)
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
 Next we calculate and print out the mean and median of the total number of steps taken per day.
 
@@ -156,7 +156,7 @@ a + scale_color_discrete(name="Data", labels=c("Imputed data", "Data with missin
     theme(plot.title = element_text(hjust = 0.5), plot.caption = element_text(hjust=0.5))
 ```
 
-<img src="figure/unnamed-chunk-8-1.png" title="plot of chunk unnamed-chunk-8" alt="plot of chunk unnamed-chunk-8" style="display: block; margin: auto;" />
+<img src="PA1_template_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
 
 Here we see that imputing data brings in values for days which were missing earlier. All in all, total number of steps doesn't change for most dates.
 
@@ -174,6 +174,6 @@ new_activity_interval_mean <- wkendComp %>%
 ggplot(new_activity_interval_mean, aes(interval, avg.steps.int)) + geom_line(color = "blue") + facet_wrap(~isWeekend, ncol = 1) + labs(y="Number of steps", x="Interval")
 ```
 
-![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png)
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
 As clearly visible, there are considerable differences in the activity performed on a weekday and a weekend.
